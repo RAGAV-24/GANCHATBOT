@@ -1,38 +1,61 @@
 import React, { useState } from 'react';
-import MessageBubble from './MessageBubble';
-import InputBox from './InputBox';
+import axios from 'axios';
 
 const ChatInterface = () => {
-    const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
 
-    const handleSendMessage = async (text) => {
-        setMessages([...messages, { sender: 'user', text }]);
+  const sendMessage = async () => {
+    if (!input) return;
 
-        // API call to generate image
-        const response = await fetch('http://localhost:5000/api/images/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: text }),
-        });
-        const data = await response.json();
+    const userMessage = { role: 'user', content: input };
+    setMessages([...messages, userMessage]);
 
-        if (data.imageUrl) {
-            setMessages([...messages, { sender: 'user', text }, { sender: 'bot', imageUrl: data.imageUrl }]);
-        } else {
-            setMessages([...messages, { sender: 'user', text }, { sender: 'bot', text: 'Error generating image.' }]);
-        }
-    };
+    try {
+      const response = await axios.post('http://localhost:5000/chat', { message: input });
+      const botMessage = { role: 'bot', content: response.data.reply };
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error:', error);
+    }
 
-    return (
-        <div className="flex flex-col h-screen p-4">
-            <div className="flex-1 overflow-y-auto">
-                {messages.map((msg, index) => (
-                    <MessageBubble key={index} sender={msg.sender} text={msg.text} imageUrl={msg.imageUrl} />
-                ))}
-            </div>
-            <InputBox onSendMessage={handleSendMessage} />
-        </div>
-    );
+    setInput('');
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-gray-100">
+      <header className="bg-black text-white text-center py-4 shadow-md">
+        <h1 className="text-xl  bg-black font-bold">ROG CHATBOT</h1>
+      </header>
+      <div className="bg-gray-900 flex-1 overflow-y-auto p-4 space-y-2">
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`p-2 rounded-lg max-w-md ${
+              msg.role === 'user' ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-300 text-black'
+            }`}
+          >
+            {msg.content}
+          </div>
+        ))}
+      </div>
+      <div className="flex p-4 bg-black border-t border-gray-200">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your message..."
+          className="flex-1 text-white text-bold bg-gray-500 px-4 py-2 border rounded-l-md focus:outline-none"
+        />
+        <button
+          onClick={sendMessage}
+          className="bg-b-black text-white px-6 py-2 rounded-r-md hover:bg-white hover:text-black"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default ChatInterface;
