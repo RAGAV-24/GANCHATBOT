@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import requests
 import os
+import base64
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests for frontend integration
@@ -32,18 +33,20 @@ def chat():
             with open(image_path, 'wb') as f:
                 f.write(response.content)
 
-            # Return image path or base64 encoded image (for frontend)
-            return jsonify({"reply": "Here is the generated image:", "image_url": f"http://localhost:5000/image/{image_path}"})
+            # Encode the image in base64 format
+            with open(image_path, "rb") as img_file:
+                img_data = img_file.read()
+                img_base64 = base64.b64encode(img_data).decode('utf-8')
+
+            # Return the base64 image data to the frontend
+            return jsonify({"reply": "Here is the generated image:", "image_data": img_base64})
+
         else:
             return jsonify({"reply": f"Failed to generate image. API error: {response.text}"}), 500
 
     except Exception as e:
         print("Error:", e)
         return jsonify({"reply": "An error occurred while processing your request."}), 500
-
-@app.route('/image/<path:filename>', methods=['GET'])
-def get_image(filename):
-    return send_file(filename, mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

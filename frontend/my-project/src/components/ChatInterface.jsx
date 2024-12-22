@@ -13,23 +13,16 @@ const ChatInterface = () => {
 
     try {
       const response = await axios.post('http://localhost:5000/chat', { message: input });
-      const botMessage = response.data.image_url
+      const botMessage = response.data.image_data
         ? {
             role: 'bot',
             content: (
               <div>
                 <img
-                  src={response.data.image_url}
+                  src={`data:image/png;base64,${response.data.image_data}`}
                   alt="Generated"
                   className="max-w-full rounded-lg"
                 />
-                <a
-                  href={response.data.image_url}
-                  download="generated-image.jpg"
-                  className="mt-2 inline-block text-blue-500"
-                >
-                  Download Image
-                </a>
               </div>
             ),
           }
