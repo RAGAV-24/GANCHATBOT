@@ -1,8 +1,3 @@
-fastapi
-uvicorn
-diffusers
-transformers
-torch
-pillow
-ngrok
-nest_asyncio
+flask
+flask-cors
+requests
