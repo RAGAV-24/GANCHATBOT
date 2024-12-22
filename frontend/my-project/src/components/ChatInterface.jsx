@@ -12,7 +12,7 @@ const ChatInterface = () => {
     setMessages([...messages, userMessage]);
 
     try {
-      const response = await axios.post('http://localhost:5000/chat', { message: input });
+      const response = await axios.post('https://ganchatbot.onrender.com/chat', { message: input });
       const botMessage = response.data.image_data
         ? {
             role: 'bot',
