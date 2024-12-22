@@ -13,10 +13,33 @@ const ChatInterface = () => {
 
     try {
       const response = await axios.post('http://localhost:5000/chat', { message: input });
-      const botMessage = { role: 'bot', content: response.data.reply };
+      const botMessage = response.data.image_url
+        ? {
+            role: 'bot',
+            content: (
+              <div>
+                <img
+                  src={response.data.image_url}
+                  alt="Generated"
+                  className="max-w-full rounded-lg"
+                />
+                <a
+                  href={response.data.image_url}
+                  download="generated-image.jpg"
+                  className="mt-2 inline-block text-blue-500"
+                >
+                  Download Image
+                </a>
+              </div>
+            ),
+          }
+        : { role: 'bot', content: response.data.reply };
+
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error('Error:', error);
+      const errorMessage = { role: 'bot', content: 'An error occurred while processing your request.' };
+      setMessages((prev) => [...prev, errorMessage]);
     }
 
     setInput('');
@@ -25,14 +48,14 @@ const ChatInterface = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <header className="bg-black text-white text-center py-4 shadow-md">
-        <h1 className="text-xl  bg-black font-bold">ROG CHATBOT</h1>
+        <h1 className="text-xl bg-black font-bold">ROG CHATBOT</h1>
       </header>
       <div className="bg-gray-900 flex-1 overflow-y-auto p-4 space-y-2">
         {messages.map((msg, index) => (
           <div
             key={index}
             className={`p-2 rounded-lg max-w-md ${
-              msg.role === 'user' ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-300 text-black'
+              msg.role === 'user' ? 'bg-black text-white ml-auto' : 'bg-gray-300 text-black'
             }`}
           >
             {msg.content}
@@ -49,7 +72,7 @@ const ChatInterface = () => {
         />
         <button
           onClick={sendMessage}
-          className="bg-b-black text-white px-6 py-2 rounded-r-md hover:bg-white hover:text-black"
+          className="bg-black text-white px-6 py-2 rounded-r-md hover:bg-white hover:text-black"
         >
           Send
         </button>
