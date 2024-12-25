@@ -5,9 +5,8 @@ import os
 import base64
 
 app = Flask(__name__)
-CORS(app)  # Allow cross-origin requests for frontend integration
+CORS(app) 
 
-# Hugging Face API Key
 HF_API_KEY = "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"
 API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3.5-large"
 
@@ -24,7 +23,6 @@ def chat():
         return jsonify({"reply": "Please provide a valid message."}), 400
 
     try:
-        # Send request to Hugging Face API
         payload = {"inputs": user_message}
         response = requests.post(API_URL, headers=HEADERS, json=payload)
 
@@ -33,12 +31,10 @@ def chat():
             with open(image_path, 'wb') as f:
                 f.write(response.content)
 
-            # Encode the image in base64 format
             with open(image_path, "rb") as img_file:
                 img_data = img_file.read()
                 img_base64 = base64.b64encode(img_data).decode('utf-8')
 
-            # Return the base64 image data to the frontend
             return jsonify({"reply": "Here is the generated image:", "image_data": img_base64})
 
         else:
